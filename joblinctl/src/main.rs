@@ -52,3 +52,26 @@ async fn main() {
 
 
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::Parser;
+    use joblinlib::types::AddMessageRequest;
+
+    #[test]
+    fn test_command_add_parsing() {
+        let args = vec!["joblinctl", "add", "--job", "echo test"];
+        let args = Args::parse_from(args);
+        match args.command {
+            Command::Add { job } => assert_eq!(job, "echo test"),
+            _ => panic!("Expected Add command"),
+        }
+    }
+
+    #[test]
+    fn test_add_message_request_construction() {
+        let req = AddMessageRequest { job: "ls -l".to_string() };
+        assert_eq!(req.job, "ls -l");
+    }
+}

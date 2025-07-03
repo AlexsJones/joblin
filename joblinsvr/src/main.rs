@@ -70,3 +70,26 @@ async fn main() -> io::Result<()> {
         });
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use joblinlib::types::AddMessageRequest;
+    use serde_json;
+
+    #[test]
+    fn test_add_message_request_from_value() {
+        let value = serde_json::json!({"job": "echo test"});
+        let req = AddMessageRequest::from_value(value);
+        assert_eq!(req.job, "echo test");
+    }
+
+    #[test]
+    fn test_split_command() {
+        let cmd = "ls -l /";
+        let parts = shell_words::split(cmd).unwrap();
+        assert_eq!(parts[0], "ls");
+        assert_eq!(parts[1], "-l");
+        assert_eq!(parts[2], "/");
+    }
+}
