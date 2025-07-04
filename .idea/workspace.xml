@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="ANALYZE_INJECTED_CODE" value="false" />
+  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="ALL" />
   </component>
@@ -18,11 +21,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2d3f1487-21b7-4f57-82d6-1f182a1f50ce" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/joblinlib/Cargo.toml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/joblinlib/src/types/mod.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/joblinsvr/src/main.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/joblinlib/src/connection/mod.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/joblinctl/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/joblinctl/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/joblinctl/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/joblinctl/src/main.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/joblinlib/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/joblinlib/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/joblinlib/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/joblinlib/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/joblinsvr/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/joblinsvr/src/main.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,28 +57,30 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Cargo.Run joblin.executor&quot;: &quot;Debug&quot;,
-    &quot;Cargo.Run joblinsvr.executor&quot;: &quot;Debug&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.rust.reset.selective.auto.import&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/axjns/Code/joblin/joblinsvr&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
-    &quot;org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon&quot;: &quot;&quot;,
-    &quot;org.rust.disableDetachedFileInspection/home/axjns/Code/joblin/joblinctl/src/main.rs&quot;: &quot;true&quot;,
-    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Cargo.Run joblin.executor": "Debug",
+    "Cargo.Run joblinctl.executor": "Debug",
+    "Cargo.Run joblinsvr.executor": "Debug",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.rust.reset.selective.auto.import": "true",
+    "git-widget-placeholder": "feat/update",
+    "last_opened_file_path": "/Users/axjns/Code/joblin",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
+    "org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon": "",
+    "org.rust.disableDetachedFileInspection/home/axjns/Code/joblin/joblinctl/src/main.rs": "true",
+    "org.rust.first.attach.projects": "true",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/joblinsvr" />
@@ -82,9 +90,9 @@
     </key>
   </component>
   <component name="RunManager" selected="Cargo.Run joblinsvr">
-    <configuration name="Run joblin" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Run joblinctl" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="buildProfileId" value="dev" />
-      <option name="command" value="run --package joblin --bin joblin" />
+      <option name="command" value="run --package joblinctl --bin joblinctl" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <envs />
       <option name="emulateTerminal" value="true" />
@@ -135,10 +143,15 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="Cargo.Test joblin" />
+      <item itemvalue="Cargo.Run joblinctl" />
+      <item itemvalue="Cargo.Run joblinsvr" />
+    </list>
     <recent_temporary>
       <list>
         <item itemvalue="Cargo.Run joblinsvr" />
-        <item itemvalue="Cargo.Run joblin" />
+        <item itemvalue="Cargo.Run joblinctl" />
       </list>
     </recent_temporary>
   </component>
@@ -157,26 +170,13 @@
       <workItem from="1751486395133" duration="1370000" />
       <workItem from="1751525846285" duration="2064000" />
       <workItem from="1751539153674" duration="1077000" />
+      <workItem from="1751556793495" duration="3764000" />
+      <workItem from="1751565026997" duration="26000" />
+      <workItem from="1751565061795" duration="3636000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/joblinsvr/src/main.rs</url>
-          <line>66</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/joblinsvr/src/main.rs</url>
-          <line>62</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>

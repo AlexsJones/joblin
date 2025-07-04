@@ -1,7 +1,7 @@
 use tokio::io;
 use tokio::net::TcpListener;
 use tokio_serde::formats::*;
-use tokio_util::codec::{FramedRead, LengthDelimitedCodec};
+use tokio_util::codec::{Framed, FramedRead, LengthDelimitedCodec};
 use futures::prelude::*;
 use serde_json::Value;
 use log::{debug, error};
@@ -9,16 +9,19 @@ use tokio::sync::mpsc;
 use tokio::sync::mpsc::{Sender, Receiver};
 use std::process::Command;
 use shell_words::split;
+use joblinlib::connection::ConnectionManager;
 use joblinlib::types::AddMessageRequest;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug")).init();
     // Start the local listener
-    let listener = TcpListener::bind("127.0.0.1:2345").await?;
+
+    let mut connection_manager = ConnectionManager::new("127.0.0.1:2345");
+    
     let (tx, mut rx): (Sender<String>, Receiver<String>) = mpsc::channel(10);
 
-    tokio::spawn(async move {   
+    tokio::spawn(async move {
         // Process jobs
         loop {
             if let Some(msg) = rx.recv().await {
@@ -44,30 +47,12 @@ async fn main() -> io::Result<()> {
         }
     });
 
+    connection_manager.listen().await.unwrap();
+
+
     loop {
-        let (socket,_ ) = listener.accept().await?;
-        let length_delimited = FramedRead::new(socket,
-                                               LengthDelimitedCodec::new());
-        // Deserialize frames
-        let mut deserialized = tokio_serde::SymmetricallyFramed::new(
-            length_delimited,
-            SymmetricalJson::<Value>::default(),
-        );
-
-
-        // Spawn a task that prints all received messages to STDOUT
-        tokio::spawn(
-            {
-                let tx = tx.clone();
-            async move {
-                while let Some(msg) = deserialized.try_next().await.unwrap() {
-
-                    let amr = AddMessageRequest::from_value(msg);
-                    //try to deserialise
-                    tx.send(amr.job).await.unwrap()
-                }
-            }
-        });
+        let tx = tx.clone();
+        connection_manager.accept_connection().await.unwrap();
     }
 }
 
