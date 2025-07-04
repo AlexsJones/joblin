@@ -7,7 +7,7 @@ SVR=joblinsvr
 # Commands
 CARGO=cargo
 
-.PHONY: all build test clean run-ctl run-svr check fmt
+.PHONY: all build test clean run-ctl run-svr check fmt install uninstall
 
 # Build all workspace members
 all: build
@@ -37,3 +37,21 @@ check:
 # Clean the target directory
 clean:
 	$(CARGO) clean
+
+# Install joblinsvr as a systemd service
+install: build
+	cargo build -p $(SVR) --release
+	install -m 0755 target/release/joblinsvr /usr/local/bin/joblinsvr
+	install -m 0644 joblinsvr/joblinsvr.service /etc/systemd/system/joblinsvr.service
+	systemctl daemon-reload
+	systemctl enable --now joblinsvr.service
+
+# Uninstall joblinsvr systemd service
+uninstall:
+	systemctl stop joblinsvr.service || true
+	systemctl disable joblinsvr.service || true
+	rm -f /usr/local/bin/joblinsvr
+	rm -f /etc/systemd/system/joblinsvr.service
+	systemctl daemon-reload
+
+

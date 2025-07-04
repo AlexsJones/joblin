@@ -1,24 +1,18 @@
 use tokio_util::codec::Framed;
 use tokio_serde::formats::SymmetricalJson;
-use tokio_serde::{SymmetricallyFramed, Framed as TokioSerdeFramed};
+use tokio_serde::SymmetricallyFramed;
 
 use tokio::net::{TcpListener, TcpStream};
-use tokio::io::{AsyncRead, AsyncWrite};
 use futures::{SinkExt, StreamExt};
 
 use tokio_util::codec::LengthDelimitedCodec;
 
 use crate::types::{AddMessageRequest};
-use tokio::io;
 
 use tokio_serde::formats::*;
 use tokio_util::codec::{FramedRead, };
 use futures::prelude::*;
-use serde_json::Value;
 
-use tokio::sync::mpsc;
-use tokio::sync::mpsc::{Sender, Receiver};
-use std::process::Command;
 
 
 #[derive(Debug)]
@@ -45,12 +39,15 @@ impl ConnectionManager {
     }
 
     pub async fn listen(&mut self) -> Result<(), anyhow::Error>{
-        self.listener = Some(TcpListener::bind("127.0.0.1:2345").await?);
+        self.listener = Some(TcpListener::bind(&self.path).await?);
         Ok(())
     }
     
-    pub async fn send(&mut self, add_message_request: AddMessageRequest, 
-    response: fn(&str)) -> Result<(), anyhow::Error> {
+    pub async fn send<F,FUT>(&mut self, add_message_request: AddMessageRequest, 
+    response: F) -> Result<(), anyhow::Error>
+    where F: Fn(String) -> FUT,
+          FUT: Future<Output = ()>
+    {
         let mut serialized = SymmetricallyFramed::new(
             self.length_delimited.as_mut().ok_or_else(|| anyhow::anyhow!("Not connected"))?,
             SymmetricalJson::<AddMessageRequest>::default(),
@@ -60,14 +57,19 @@ impl ConnectionManager {
             .send(add_message_request)
             .await?;
         if let Some(message) = serialized.next().await {
-            response(message?.job.as_str())
+            response(message?.job).await;
         }
         Ok(())
     }
     /// Accepts a new connection and sets up JSON frame deserialization
     /// # Returns
     /// * `Result<()>` - Ok if the connection was successfully accepted
-    pub async fn accept_connection(&mut self) -> Result<(), anyhow::Error> {
+    pub async fn accept_connection<F,Fut
+    >(&mut self, cb: F) -> Result<(), anyhow::Error>
+    where F: Fn(String) -> Fut,
+          Fut: Future<Output = ()>
+
+    {
         let (socket, _) = self.listener
             .as_mut()
             .unwrap()
@@ -78,13 +80,13 @@ impl ConnectionManager {
         let mut deserialized: JsonFramedConnection = self.create_json_framed(length_delimited);
 
         while let Some(message) = deserialized.try_next().await? {
-            println!("{:?}", message.job);
+            cb(message.job).await;
         }
-
-
+        
         Ok(())
     }
-    fn create_json_framed(&self, length_delimited: FramedRead<TcpStream, LengthDelimitedCodec>) -> JsonFramedConnection {
+    fn create_json_framed(&self, length_delimited: FramedRead<TcpStream,
+        LengthDelimitedCodec>) -> JsonFramedConnection {
         tokio_serde::SymmetricallyFramed::new(
             length_delimited,
             SymmetricalJson::<AddMessageRequest>::default(),

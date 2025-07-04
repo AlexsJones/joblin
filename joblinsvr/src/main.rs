@@ -1,16 +1,11 @@
 use tokio::io;
-use tokio::net::TcpListener;
-use tokio_serde::formats::*;
-use tokio_util::codec::{Framed, FramedRead, LengthDelimitedCodec};
 use futures::prelude::*;
-use serde_json::Value;
 use log::{debug, error};
 use tokio::sync::mpsc;
 use tokio::sync::mpsc::{Sender, Receiver};
 use std::process::Command;
 use shell_words::split;
 use joblinlib::connection::ConnectionManager;
-use joblinlib::types::AddMessageRequest;
 
 #[tokio::main]
 async fn main() -> io::Result<()> {
@@ -25,7 +20,7 @@ async fn main() -> io::Result<()> {
         // Process jobs
         loop {
             if let Some(msg) = rx.recv().await {
-                debug!("Processing job {}", msg);
+                debug!("Processing job {msg}");
                 match split(msg.as_str()) {
                     Ok(parts) => {
                        println!("Command: {}", &parts[0]);
@@ -37,30 +32,34 @@ async fn main() -> io::Result<()> {
                                 debug!("Command: {}:{}",s.status, String::from_utf8_lossy(&s.stdout));
                             }
                             Err(e) => {
-                                error!("{}", e);
+                                error!("{e}");
                             }
                         }
                     },
-                    Err(e) => error!("{}", e),
+                    Err(e) => error!("{e}"),
                 }
             }
         }
     });
 
     connection_manager.listen().await.unwrap();
-
-
+    
     loop {
         let tx = tx.clone();
-        connection_manager.accept_connection().await.unwrap();
+        connection_manager.accept_connection(|x| {
+            let tx = tx.clone();
+            async move {
+           tx.send(x).await.unwrap();
+        }}).await.unwrap();
+
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    
     use joblinlib::types::AddMessageRequest;
-    use serde_json;
+    
 
     #[test]
     fn test_add_message_request_from_value() {

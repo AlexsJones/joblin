@@ -1,0 +1,13 @@
+[Unit]
+Description=Joblin Server
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/joblinsvr
+Restart=on-failure
+User=joblin
+Group=joblin
+
+[Install]
+WantedBy=multi-user.target 

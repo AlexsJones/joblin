@@ -1,12 +1,6 @@
-use tokio_util::codec::Framed;
-use tokio_serde::formats::SymmetricalJson;
-use tokio_serde::{SymmetricallyFramed, Framed as TokioSerdeFramed};
 
-use tokio::net::TcpStream;
-use tokio::io::{AsyncRead, AsyncWrite};
-use futures::{SinkExt, StreamExt};
+use futures::SinkExt;
 use clap::Parser;
-use tokio_util::codec::LengthDelimitedCodec;
 use joblinlib::connection::{ConnectionManager};
 use joblinlib::types::{AddMessageRequest};
 #[derive(Parser, Debug)]
@@ -38,10 +32,9 @@ async fn main()  {
     
     match args.command {
         Command::Add { job } => {
-
             connection_manager.send(AddMessageRequest{
-                job: job.clone()}, |x| {
-                println!("{:?}", x);
+                job: job.clone()}, |x| async move{
+                println!("{x:?}");
             }).await.unwrap();
         },
         Command::List { } => {
