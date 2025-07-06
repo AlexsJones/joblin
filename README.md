@@ -123,3 +123,25 @@ This project is built on top of [Tokio](https://tokio.rs/), Rust's leading async
     - Uses `anyhow` and idiomatic Rust error propagation for robust async error handling.
 
 This architecture is a practical example of how to build robust, scalable, and highly concurrent networked applications in Rust using Tokio.
+
+---
+
+## 🧪 Integration & Load Testing
+
+This project includes integration tests to prove the server's asynchronous and concurrent behavior:
+
+- **Async Concurrency Test (`async_server.rs`)**: 
+    - Launches the server and submits multiple jobs in parallel from separate clients.
+    - Verifies that jobs are processed concurrently (not serially) by measuring total execution time. If the server were serial, the test would take much longer.
+
+- **Load Test (`load_test.rs`)**:
+    - Spawns a large number of clients (e.g., 50), each submitting a job simultaneously.
+    - Asserts that all jobs complete in much less time than if they were processed one after another, demonstrating the server's ability to handle high load and many concurrent connections.
+    - Fails if the server cannot keep up or processes jobs serially.
+
+These tests demonstrate the robustness and scalability of the async server implementation, and can be run with:
+
+```sh
+cargo test --test async_server
+cargo test --test load_test
+```
