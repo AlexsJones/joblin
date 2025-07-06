@@ -9,6 +9,10 @@ impl AddMessageRequest {
         serde_json::from_value(value).unwrap()
     }
 }
+#[derive(Serialize, Deserialize, Default)]
+pub struct AddMessageResponse {
+    pub message: String,
+}
 #[derive(Serialize, Deserialize)]
 pub struct ListMessageRequest {
 

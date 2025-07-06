@@ -100,3 +100,23 @@ This project is intentionally designed to challenge my understanding of:
 ## 📜 License
 
 MIT OR Apache-2.0 — choose what suits you.
+
+---
+
+## 🛠️ Technology: Tokio Async Client/Server & Callbacks
+
+This project is built on top of [Tokio](https://tokio.rs/), Rust's leading asynchronous runtime. It demonstrates:
+
+- **Async TCP Networking:** Both the client (`joblinctl`) and server (`joblinsvr`) use Tokio's async TCP primitives to communicate efficiently without blocking threads.
+- **Framed, Length-Delimited Protocol:** Messages are sent as length-delimited frames, using `tokio_util::codec::LengthDelimitedCodec` and `tokio_serde` for seamless JSON serialization/deserialization.
+- **Client/Server Model:**
+    - The server listens for incoming connections and processes job requests concurrently, spawning tasks for each connection.
+    - The client connects to the server, sends job requests, and awaits responses.
+- **Callback-based Response Handling:**
+    - The client uses a callback (an async closure) to handle each response from the server, demonstrating how to pass and execute async callbacks in Rust.
+- **Concurrency:**
+    - The server can process multiple jobs in parallel, leveraging Tokio's task scheduling and message passing (via channels).
+- **Error Handling:**
+    - Uses `anyhow` and idiomatic Rust error propagation for robust async error handling.
+
+This architecture is a practical example of how to build robust, scalable, and highly concurrent networked applications in Rust using Tokio.

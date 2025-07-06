@@ -1,8 +1,9 @@
-
+use log::debug;
 use futures::SinkExt;
 use clap::Parser;
 use joblinlib::connection::{ConnectionManager};
 use joblinlib::types::{AddMessageRequest};
+
 #[derive(Parser, Debug)]
 struct Args {
     #[clap(subcommand)]
@@ -32,10 +33,16 @@ async fn main()  {
     
     match args.command {
         Command::Add { job } => {
-            connection_manager.send(AddMessageRequest{
+            match connection_manager.send(AddMessageRequest{
                 job: job.clone()}, |x| async move{
-                println!("{x:?}");
-            }).await.unwrap();
+                // Example of the callback from the server to the client
+                println!("{}", x.message);
+            }).await {
+                Ok(_) => {}
+                Err(e) => {
+                    debug!("{e}")
+                }
+            }
         },
         Command::List { } => {
 

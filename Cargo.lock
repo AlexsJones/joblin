@@ -377,6 +377,7 @@ dependencies = [
  "env_logger",
  "futures",
  "joblinlib",
+ "log",
  "serde_json",
  "tokio",
  "tokio-serde",

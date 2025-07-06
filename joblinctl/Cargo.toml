@@ -13,3 +13,4 @@ tokio-serde = { version = "0.9.0", features = ["bincode", "json", "serde_json"] 
 clap = { version = "4.5.40", features = ["derive"] }
 joblinlib = { path = "../joblinlib" }
 anyhow = "1.0.98"
+log = "0.4.27"

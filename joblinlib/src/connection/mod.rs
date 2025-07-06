@@ -1,19 +1,14 @@
 use tokio_util::codec::Framed;
-use tokio_serde::formats::SymmetricalJson;
-use tokio_serde::SymmetricallyFramed;
 
 use tokio::net::{TcpListener, TcpStream};
 use futures::{SinkExt, StreamExt};
 
 use tokio_util::codec::LengthDelimitedCodec;
 
-use crate::types::{AddMessageRequest};
+use crate::types::{AddMessageRequest, AddMessageResponse};
 
 use tokio_serde::formats::*;
-use tokio_util::codec::{FramedRead, };
 use futures::prelude::*;
-
-
 
 #[derive(Debug)]
 pub struct ConnectionManager {
@@ -23,12 +18,17 @@ pub struct ConnectionManager {
 }
 
 type JsonFramedConnection = tokio_serde::Framed<
-    FramedRead<tokio::net::TcpStream, LengthDelimitedCodec>,
+    Framed<tokio::net::TcpStream, LengthDelimitedCodec>,
     AddMessageRequest,  // Changed from Value
-    AddMessageRequest,  // Changed from Value
-    Json<AddMessageRequest, AddMessageRequest>
+    AddMessageResponse,  // Changed from Value
+    Json<AddMessageRequest, AddMessageResponse>
 >;
-
+type OutConnection = tokio_serde::Framed<
+    Framed<tokio::net::TcpStream, LengthDelimitedCodec>,
+    AddMessageResponse,  // Changed from Value
+    AddMessageRequest,  // Changed from Value
+    Json<AddMessageResponse, AddMessageRequest>
+>;
 
 impl ConnectionManager {
     pub async fn connect(&mut self) -> Result<(), anyhow::Error>{
@@ -45,20 +45,21 @@ impl ConnectionManager {
     
     pub async fn send<F,FUT>(&mut self, add_message_request: AddMessageRequest, 
     response: F) -> Result<(), anyhow::Error>
-    where F: Fn(String) -> FUT,
+    where F: Fn(AddMessageResponse) -> FUT,
           FUT: Future<Output = ()>
     {
-        let mut serialized = SymmetricallyFramed::new(
-            self.length_delimited.as_mut().ok_or_else(|| anyhow::anyhow!("Not connected"))?,
-            SymmetricalJson::<AddMessageRequest>::default(),
-        );
-
-        serialized
+        let Some(stream) = self.length_delimited.take() else {
+            return Err(anyhow::anyhow!("Not connected"));
+        };
+        let mut framed: OutConnection = self.create_connection(stream);
+        framed
             .send(add_message_request)
             .await?;
-        if let Some(message) = serialized.next().await {
-            response(message?.job).await;
+        if let Some(Ok(message)) = framed.next().await {
+            response(message).await;
         }
+        // Optionally, save the connection for reuse:
+        self.length_delimited = Some(framed.into_inner());
         Ok(())
     }
     /// Accepts a new connection and sets up JSON frame deserialization
@@ -76,20 +77,35 @@ impl ConnectionManager {
             .accept()
             .await?;
 
-        let length_delimited = FramedRead::new(socket, LengthDelimitedCodec::new());
-        let mut deserialized: JsonFramedConnection = self.create_json_framed(length_delimited);
+        let length_delimited = Framed::new(socket, LengthDelimitedCodec::new());
+        let mut framed: JsonFramedConnection = self.create_json_framed(length_delimited);
 
-        while let Some(message) = deserialized.try_next().await? {
+        while let Some(message) = framed.try_next().await? {
+
             cb(message.job).await;
+            framed.send(AddMessageResponse {
+                // Callback from the server to the client
+                message: "OK".to_string()
+            }).await?;
         }
-        
         Ok(())
     }
-    fn create_json_framed(&self, length_delimited: FramedRead<TcpStream,
-        LengthDelimitedCodec>) -> JsonFramedConnection {
-        tokio_serde::SymmetricallyFramed::new(
+    fn create_json_framed(
+        &self,
+        length_delimited: Framed<TcpStream, LengthDelimitedCodec>,
+    ) -> JsonFramedConnection {
+        tokio_serde::Framed::new(
             length_delimited,
-            SymmetricalJson::<AddMessageRequest>::default(),
+            Json::<AddMessageRequest, AddMessageResponse>::default(),
+        )
+    }
+    fn create_connection(
+        &self,
+        length_delimited: Framed<TcpStream, LengthDelimitedCodec>,
+    ) -> OutConnection {
+        tokio_serde::Framed::new(
+            length_delimited,
+            Json::<AddMessageResponse, AddMessageRequest>::default(),
         )
     }
 
