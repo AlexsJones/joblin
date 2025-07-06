@@ -46,7 +46,7 @@ async fn main() -> io::Result<()> {
     
     loop {
         let tx = tx.clone();
-        connection_manager.accept_connection(|x| {
+        connection_manager.accept_connection(move |x| {
             let tx = tx.clone();
             async move {
            tx.send(x).await.unwrap();
@@ -54,7 +54,6 @@ async fn main() -> io::Result<()> {
 
     }
 }
-
 #[cfg(test)]
 mod tests {
     

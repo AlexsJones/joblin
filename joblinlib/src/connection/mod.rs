@@ -9,6 +9,7 @@ use crate::types::{AddMessageRequest, AddMessageResponse};
 
 use tokio_serde::formats::*;
 use futures::prelude::*;
+use log::error;
 
 #[derive(Debug)]
 pub struct ConnectionManager {
@@ -17,7 +18,7 @@ pub struct ConnectionManager {
     listener: Option<TcpListener>
 }
 
-type JsonFramedConnection = tokio_serde::Framed<
+type InConnection = tokio_serde::Framed<
     Framed<tokio::net::TcpStream, LengthDelimitedCodec>,
     AddMessageRequest,  // Changed from Value
     AddMessageResponse,  // Changed from Value
@@ -51,7 +52,7 @@ impl ConnectionManager {
         let Some(stream) = self.length_delimited.take() else {
             return Err(anyhow::anyhow!("Not connected"));
         };
-        let mut framed: OutConnection = self.create_connection(stream);
+        let mut framed: OutConnection = self.create_outgoing_connection(stream);
         framed
             .send(add_message_request)
             .await?;
@@ -67,8 +68,8 @@ impl ConnectionManager {
     /// * `Result<()>` - Ok if the connection was successfully accepted
     pub async fn accept_connection<F,Fut
     >(&mut self, cb: F) -> Result<(), anyhow::Error>
-    where F: Fn(String) -> Fut,
-          Fut: Future<Output = ()>
+    where F: Fn(String) -> Fut + Send + 'static,
+          Fut: Future<Output = ()> + Send + 'static,
 
     {
         let (socket, _) = self.listener
@@ -77,29 +78,40 @@ impl ConnectionManager {
             .accept()
             .await?;
 
-        let length_delimited = Framed::new(socket, LengthDelimitedCodec::new());
-        let mut framed: JsonFramedConnection = self.create_json_framed(length_delimited);
+        // spawn a thread
 
-        while let Some(message) = framed.try_next().await? {
-
-            cb(message.job).await;
-            framed.send(AddMessageResponse {
-                // Callback from the server to the client
-                message: "OK".to_string()
-            }).await?;
-        }
+        tokio::spawn(
+            async move {
+                let length_delimited = Framed::new(socket, LengthDelimitedCodec::new());
+                let mut framed: InConnection = ConnectionManager::create_incoming_connection(length_delimited);
+                while let Some(message) = framed.next().await {
+                    match message {
+                        Ok(message) => {
+                            cb(message.job).await;
+                            framed.send(AddMessageResponse {
+                                // Callback from the server to the client
+                                message: "OK".to_string()
+                            }).await.expect("something went wrong!");
+                        }
+                        Err(e) => {
+                            error!("{e}");
+                        }
+                    }
+                }
+            });
         Ok(())
     }
-    fn create_json_framed(
-        &self,
+    // Static method as this gets used inside a spawned thread
+    fn create_incoming_connection(
+       
         length_delimited: Framed<TcpStream, LengthDelimitedCodec>,
-    ) -> JsonFramedConnection {
+    ) -> InConnection {
         tokio_serde::Framed::new(
             length_delimited,
             Json::<AddMessageRequest, AddMessageResponse>::default(),
         )
     }
-    fn create_connection(
+    fn create_outgoing_connection(
         &self,
         length_delimited: Framed<TcpStream, LengthDelimitedCodec>,
     ) -> OutConnection {
