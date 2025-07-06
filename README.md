@@ -1,5 +1,34 @@
 # 🦀 Joblin
 
+---
+
+## 📊 Honest Score Card
+
+**Strengths:**
+- Demonstrates real async client/server architecture in Rust using Tokio
+- Uses modern Rust features: async/await, channels, serde, error handling
+- Good separation of concerns (client, server, shared lib)
+- Includes both unit and integration tests (async and load)
+- Clear, idiomatic code for message framing and protocol
+- README and code are well-documented
+
+**Weaknesses:**
+- Integration tests require spawning binaries, which is slow and can be brittle
+- No HTTP/REST API (yet)
+- Protocol is not easily extensible to new message types without refactor
+- Error handling is basic in some places (e.g., unwraps in server)
+- No persistent job storage or advanced job management
+- No authentication or security
+- No web UI or advanced monitoring
+
+**Grade:**
+
+> **B+**
+>
+> A solid, idiomatic async Rust project that demonstrates real-world concurrency and protocol design. With a few more features (REST API, extensible protocol, persistent storage, better error handling), it could be an A.
+
+---
+
 **Joblin** is a minimal distributed job queue system, written in Rust, split into:
 
 - `joblinctl`: A command-line client to submit and monitor jobs
