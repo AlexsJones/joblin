@@ -7,6 +7,9 @@
 
 This project is part of my Rust mastery journey — designed to practice real-world async concurrency, trait design, CLI structure, and message passing.
 
+_I have been writing this exclusively without AI, which feels like a novelty. 
+But given how quickly I am forgetting rust these days... it is a necessity_
+
 ---
 
 ## 🎯 Goals & Learning Objectives

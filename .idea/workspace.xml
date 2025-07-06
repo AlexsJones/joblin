@@ -21,13 +21,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2d3f1487-21b7-4f57-82d6-1f182a1f50ce" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/joblinctl/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/joblinctl/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/joblinctl/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/joblinctl/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/joblinlib/src/connection/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/joblinlib/src/connection/mod.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/joblinlib/src/types/mod.rs" beforeDir="false" afterPath="$PROJECT_DIR$/joblinlib/src/types/mod.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -173,7 +169,7 @@
       <workItem from="1751565026997" duration="26000" />
       <workItem from="1751565061795" duration="4854000" />
       <workItem from="1751617312310" duration="3418000" />
-      <workItem from="1751708202806" duration="5002000" />
+      <workItem from="1751708202806" duration="5161000" />
     </task>
     <servers />
   </component>
