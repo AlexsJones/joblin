@@ -2,6 +2,34 @@
 
 ---
 
+## 📝 Homework Assignment: Mini Distributed Job Queue
+
+**Project Idea:** Build a minimal distributed job queue system with a CLI client and a background server.
+
+**Requirements:**
+- Start a background job server (`jobd`) that processes tasks (e.g., `sleep` commands)
+- Add jobs via a CLI client (`jobctl`)
+- Monitor job status (Queued, Running, Done, Failed)
+- Persist state (in-memory or to disk)
+- Optionally communicate over HTTP or local sockets
+
+**Key Features:**
+- `jobd`: Accepts job requests, queues and executes them, reports status
+- `jobctl`: Adds jobs, lists status, optionally polls for progress
+
+**Skills Practiced:**
+- Async concurrency with Tokio (or threads)
+- Channels for job queues
+- Traits/enums for job types
+- Persistence with serde
+- Multi-command CLI with clap
+- Local communication (TCP/Unix sockets)
+- Robust error handling
+- Unit and integration testing
+- Process management with `std::process::Command`
+
+---
+
 ## 📊 Honest Score Card
 
 **Strengths:**
